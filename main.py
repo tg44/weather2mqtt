@@ -1,14 +1,14 @@
-import os, json, crython, requests
+import os, json, crython, requests, traceback
 from paho.mqtt import publish
 
 print("started")
 topic = os.environ.get('MQTT_TOPIC')
 host = os.environ.get('MQTT_HOST')
-port = os.environ.get('MQTT_PORT')
+port = int(os.getenv('MQTT_PORT', '1883'))
 
 cityId = os.environ.get('CITY_ID')
 appId = os.environ.get('APP_ID')
-units = os.getenv('UNITS', 'metric') #standard, metrics, imperial
+units = os.getenv('UNITS', 'metric') #standard, metric, imperial
 lang = os.getenv('API_LANG', 'en')
 
 schedule = os.getenv('SCHEDULE')
@@ -30,6 +30,9 @@ def process():
             publish.single(topic, jsonString, hostname=host, port=port)
     except requests.exceptions.RequestException as e:
         print("OpenWeatherMap not available: " + str(e))
+    except Exception as e:
+        print("Unknown error:" + str(e))
+        traceback.print_exc()
 
 if __name__ == "__main__":
     if schedule is None:
